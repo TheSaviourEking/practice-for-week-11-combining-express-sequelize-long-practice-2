@@ -6,6 +6,7 @@ const router = express.Router();
  * BASIC PHASE 1, Step A - Import model
  */
 // Your code here
+const { Tree } = require('../db/models');
 
 /**
  * INTERMEDIATE BONUS PHASE 1 (OPTIONAL), Step A:
@@ -27,6 +28,10 @@ router.get('/', async (req, res, next) => {
     let trees = [];
 
     // Your code here
+    trees = await Tree.findAll({
+        attributes: ['heightFt', 'tree', 'id'],
+        order: [['heightFt', 'DESC']]
+    })
 
     res.json(trees);
 });
@@ -45,6 +50,9 @@ router.get('/:id', async (req, res, next) => {
 
     try {
         // Your code here
+        tree = await Tree.findOne({
+            where: { id: req.params.id }
+        });
 
         if (tree) {
             res.json(tree);
@@ -55,7 +63,7 @@ router.get('/:id', async (req, res, next) => {
                 details: 'Tree not found'
             });
         }
-    } catch(err) {
+    } catch (err) {
         next({
             status: "error",
             message: `Could not find tree ${req.params.id}`,
@@ -86,7 +94,7 @@ router.post('/', async (req, res, next) => {
             status: "success",
             message: "Successfully created new tree",
         });
-    } catch(err) {
+    } catch (err) {
         next({
             status: "error",
             message: 'Could not create new tree',
@@ -121,7 +129,7 @@ router.delete('/:id', async (req, res, next) => {
             status: "success",
             message: `Successfully removed tree ${req.params.id}`,
         });
-    } catch(err) {
+    } catch (err) {
         next({
             status: "error",
             message: `Could not remove tree ${req.params.id}`,
@@ -167,7 +175,7 @@ router.delete('/:id', async (req, res, next) => {
 router.put('/:id', async (req, res, next) => {
     try {
         // Your code here
-    } catch(err) {
+    } catch (err) {
         next({
             status: "error",
             message: 'Could not update new tree',
