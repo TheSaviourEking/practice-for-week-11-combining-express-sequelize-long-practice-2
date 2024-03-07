@@ -103,7 +103,7 @@ router.post('/', async (req, res, next) => {
                 data: newTree
             });
         } else {
-            throw new Error(`Tree '${name}' already exists`);
+            throw new Error(`Tree with name '${name}' already exists at '${location}'`);
         }
     } catch (err) {
         next({
