@@ -90,10 +90,21 @@ router.get('/:id', async (req, res, next) => {
  */
 router.post('/', async (req, res, next) => {
     try {
-        res.json({
-            status: "success",
-            message: "Successfully created new tree",
+        const { name, location, height, size } = req.body;
+        const newTree = Tree.build({
+            tree: name, location, heightFt: height, groundCircumferenceFt: size
         });
+        if (!(await Tree.findOne({ where: { tree: name, location, heightFt: height, groundCircumferenceFt: size } }))) {
+            await newTree.save();
+
+            res.json({
+                status: "success",
+                message: "Successfully created new tree",
+                data: newTree
+            });
+        } else {
+            throw new Error(`Tree '${name}' already exists`);
+        }
     } catch (err) {
         next({
             status: "error",
