@@ -10,7 +10,9 @@
     "test": "NODE_ENV=test mocha --timeout 60000",
     "test-with-json": "NODE_ENV=test mocha --reporter json --timeout 100000",
     "migrate": "npx dotenv sequelize db:migrate",
-    "migrate-undo": "npx dotenv sequelize db:migrate:undo"
+    "migrate-undo": "npx dotenv sequelize db:migrate:undo",
+    "seed-all": "npx dotenv sequelize-cli db:seed:all",
+    "seed-undo-all": "npx dotenv sequelize-cli db:seed:undo:all"
   },
   "keywords": [
     "Express",
