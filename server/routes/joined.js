@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 // Import models - DO NOT MODIFY
-const { Insect, Tree, InsectTrees } = require('../db/models');
+const { Insect, Tree } = require('../db/models');
 const { Op } = require("sequelize");
 
 /**
