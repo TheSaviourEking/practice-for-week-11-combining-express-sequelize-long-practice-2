@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 // Import models - DO NOT MODIFY
-const { Insect, Tree } = require('../db/models');
+const { Insect, Tree, InsectTrees } = require('../db/models');
 const { Op } = require("sequelize");
 
 /**
@@ -24,6 +24,18 @@ router.get('/trees-insects', async (req, res, next) => {
 
     trees = await Tree.findAll({
         attributes: ['id', 'tree', 'location', 'heightFt'],
+        include: [{
+            attributes: ['id', 'name'],
+            model: Insect,
+            through: {
+                attributes: []
+            },
+            required: true
+        }],
+        order: [
+            ['heightFt', 'DESC'],
+            [Insect, 'name']
+        ]
     });
 
     res.json(trees);
@@ -47,7 +59,7 @@ router.get('/insects-trees', async (req, res, next) => {
 
     const insects = await Insect.findAll({
         attributes: ['id', 'name', 'description'],
-        order: [ ['name'] ],
+        order: [['name']],
     });
     for (let i = 0; i < insects.length; i++) {
         const insect = insects[i];
@@ -55,6 +67,11 @@ router.get('/insects-trees', async (req, res, next) => {
             id: insect.id,
             name: insect.name,
             description: insect.description,
+            trees: await insect.getTrees({
+                attributes: ['id', 'tree'],
+                order: ['tree'],
+                joinTableAttributes: []
+            })
         });
     }
 
