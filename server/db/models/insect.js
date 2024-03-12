@@ -13,9 +13,16 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       this.belongsToMany(
         models.Tree,
-        { through: models.InsectTree }
+        {
+          through: models.InsectTree,
+          foreignKey: 'insectId'
+        }
       )
     }
+
+    // toJSON() {
+    //   return { id: this.id, name: this.name }
+    // }
   };
   Insect.init({
     name: DataTypes.STRING,
