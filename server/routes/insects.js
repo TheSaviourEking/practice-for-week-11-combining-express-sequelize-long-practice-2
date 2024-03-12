@@ -2,6 +2,8 @@
 const express = require('express');
 const router = express.Router();
 
+const { Op } = require('sequelize');
+
 /**
  * INTERMEDIATE BONUS PHASE 2 (OPTIONAL) - Code routes for the insects
  *   by mirroring the functionality of the trees
