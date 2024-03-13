@@ -106,6 +106,88 @@ router.get('/insects-trees', async (req, res, next) => {
  *   - (Any others you think of)
  */
 // Your code here
+router.post('/associate-tree-insect', async (req, res, next) => {
+    let error = new Error();
+    error = {
+        status: 'Error',
+        message: 'Could not create association',
+        details: 'an error occured'
+    }
+    try {
+        // let error = new Error();
+        let foundTree, foundInsect;
+        const { tree, insect } = req.body;
+        if (!tree) {
+            error.details = 'tree missing in request';
+            throw error;
+        }
+
+        else if (tree) {
+            if (tree.id) {
+                foundTree = await Tree.findByPk(tree.id);
+            } else if (tree && (!tree.id)) {
+                foundTree = await Tree.findOne({
+                    where: {
+                        tree: tree.name,
+                        location: tree.location,
+                        heightFt: tree.height,
+                        groundCircumferenceFt: tree.size
+                    }
+                });
+                // creating tree if not in db
+                if (!foundTree) {
+                    foundTree = await Tree.create({
+                        tree: tree.name,
+                        location: tree.location,
+                        heightFt: tree.height,
+                        groundCircumferenceFt: tree.size
+                    });
+                }
+            }
+        }
+        if (!foundTree) {
+            error.details = `Tree ${tree.id} not found`
+            throw error;
+        }
+
+        // insect
+        if (!insect) {
+            error.details = 'insect missing in request';
+            throw error;
+        }
+
+        if (insect.id) {
+            foundInsect = await Insect.findByPk(insect.id)
+        } else if (!insect.id) {
+            foundInsect = await Insect.findOne({ ...insect });
+            // create insect if not in db
+            if (!foundInsect) {
+                foundInsect = await Insect.create({ ...insect });
+            }
+        }
+        if (!foundInsect) {
+            error.details = `Insect ${insect.id} not found`
+            throw error;
+        }
+
+        if (foundInsect && foundTree) {
+            if (!!await foundTree.hasInsect(foundInsect)) {
+                error.details = `Association already exists between ${foundTree.tree} and ${Insect.name}`;
+                throw error;
+            } else {
+                foundTree.addInsect(foundInsect);
+
+                res.json({
+                    status: 'success',
+                    message: 'Successfully created association',
+                    data: { tree, insect }
+                })
+            }
+        }
+    } catch (err) {
+        next(err);
+    }
+})
 
 // Export class - DO NOT MODIFY
 module.exports = router;

@@ -19,10 +19,6 @@ module.exports = (sequelize, DataTypes) => {
         }
       )
     }
-
-    // toJSON() {
-    //   return {id: this.id,}
-    // }
   };
   Tree.init({
     tree: DataTypes.STRING,
