@@ -107,76 +107,57 @@ router.get('/insects-trees', async (req, res, next) => {
  */
 // Your code here
 router.post('/associate-tree-insect', async (req, res, next) => {
-    let error = new Error();
-    error = {
-        status: 'Error',
-        message: 'Could not create association',
-        details: 'an error occured'
-    }
     try {
-        // let error = new Error();
-        let foundTree, foundInsect;
+        const error = new Error();
+
         const { tree, insect } = req.body;
+        let foundInsect, foundTree
         if (!tree) {
-            error.details = 'tree missing in request';
+            error.message = 'tree missing in request';
+            throw error;
+        }
+        if (!insect) {
+            error.message = 'insect missing in request';
             throw error;
         }
 
-        else if (tree) {
+        if (tree) {
             if (tree.id) {
                 foundTree = await Tree.findByPk(tree.id);
-            } else if (tree && (!tree.id)) {
-                foundTree = await Tree.findOne({
-                    where: {
-                        tree: tree.name,
-                        location: tree.location,
-                        heightFt: tree.height,
-                        groundCircumferenceFt: tree.size
-                    }
-                });
-                // creating tree if not in db
                 if (!foundTree) {
-                    foundTree = await Tree.create({
-                        tree: tree.name,
-                        location: tree.location,
-                        heightFt: tree.height,
-                        groundCircumferenceFt: tree.size
-                    });
+                    error.message = `Tree ${tree.id} not found`
                 }
+            } else {
+                // no tree id
+                foundTree = await Tree.build({
+                    tree: tree.name,
+                    location: tree.location,
+                    heightFt: tree.height,
+                    groundCircumferenceFt: tree.size
+                });
+                await foundTree.save();
             }
         }
-        if (!foundTree) {
-            error.details = `Tree ${tree.id} not found`
-            throw error;
-        }
 
-        // insect
-        if (!insect) {
-            error.details = 'insect missing in request';
-            throw error;
-        }
-
-        if (insect.id) {
-            foundInsect = await Insect.findByPk(insect.id)
-        } else if (!insect.id) {
-            foundInsect = await Insect.findOne({ ...insect });
-            // create insect if not in db
-            if (!foundInsect) {
-                foundInsect = await Insect.create({ ...insect });
+        if (insect) {
+            if (insect.id) {
+                foundInsect = await Insect.findByPk(insect.id);
+                if (!foundInsect) {
+                    error.message = `Insect ${insect.id} not found`;
+                    throw error;
+                }
+            } else {
+                foundInsect = await Insect.build(insect);
+                await foundInsect.save();
             }
         }
-        if (!foundInsect) {
-            error.details = `Insect ${insect.id} not found`
-            throw error;
-        }
 
-        if (foundInsect && foundTree) {
-            if (!!await foundTree.hasInsect(foundInsect)) {
-                error.details = `Association already exists between ${foundTree.tree} and ${Insect.name}`;
+        if (tree && insect) {
+            if (await foundInsect.hasTree(foundTree) && await foundTree.hasInsect(foundInsect)) {
+                error.message = `Association already exists between ${foundTree.tree} and ${foundInsect.name}`;
                 throw error;
             } else {
-                foundTree.addInsect(foundInsect);
-
+                await foundInsect.addTree(foundTree);
                 res.json({
                     status: 'success',
                     message: 'Successfully created association',
@@ -184,8 +165,8 @@ router.post('/associate-tree-insect', async (req, res, next) => {
                 })
             }
         }
-    } catch (err) {
-        next(err);
+    } catch (error) {
+        next(error)
     }
 })
 

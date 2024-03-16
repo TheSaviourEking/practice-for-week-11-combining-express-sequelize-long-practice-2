@@ -83,5 +83,28 @@ async function updateInsect(req, res, next) {
     }
 }
 
+router.get('/search/:name', async (req, res, next) => {
+    try {
+        const insect = await Insect.findOne({
+            where: {
+                'name': {
+                    [Op.like]: `%${req.params.name}%`
+                }
+            }
+        })
+
+        if (insect) {
+            console.log(insect)
+            res.json(insect)
+        } else {
+            next({
+                error: 'error occured'
+            })
+        }
+    } catch (error) {
+        next(error)
+    }
+})
+
 // Export class - DO NOT MODIFY
 module.exports = router;
